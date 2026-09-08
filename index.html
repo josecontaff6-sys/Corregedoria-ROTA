@@ -1,1 +1,1071 @@
-index.html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ROTA · Sistema de Advertências</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Great+Vibes&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0C0E;
+    --panel:#14171B;
+    --panel-2:#1B1F24;
+    --border:#262B31;
+    --gold:#C9A227;
+    --green:#3C7A3E;
+    --red:#B3221D;
+    --paper:#EDE7D6;
+    --text:#E7E3D8;
+    --muted:#878E96;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    background:
+      radial-gradient(circle at 15% 0%, rgba(201,162,39,0.06), transparent 45%),
+      radial-gradient(circle at 85% 100%, rgba(179,34,29,0.06), transparent 45%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:20px 40px;
+    border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+    flex-shrink:0;
+  }
+  .brand{display:flex;align-items:center;gap:14px;}
+  .badge{
+    width:42px;height:42px;border-radius:50%;
+    border:2px solid var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Oswald',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;
+    color:var(--gold);
+    background:radial-gradient(circle, rgba(201,162,39,0.12), transparent 70%);
+    flex-shrink:0;
+  }
+  .brand-text h1{
+    font-family:'Oswald',sans-serif;font-weight:600;font-size:19px;
+    letter-spacing:2px;margin:0;text-transform:uppercase;
+  }
+  .brand-text span{
+    font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:1px;
+  }
+  .status-pill{
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;
+    padding:6px 12px;border-radius:20px;border:1px solid var(--border);
+    color:var(--muted);white-space:nowrap;
+  }
+  .status-pill.on{border-color:rgba(60,190,110,0.4);color:#7BD79A;}
+  .status-pill.on::before{content:"● ";}
+  .status-pill.off::before{content:"● ";color:var(--red);}
+
+  /* ---------- tabs ---------- */
+  .tabbar{
+    display:flex;gap:0;
+    border-bottom:1px solid var(--border);
+    padding:0 40px;
+    flex-shrink:0;
+    background:var(--bg);
+  }
+  .tab-btn{
+    appearance:none;background:transparent;border:none;
+    color:var(--muted);
+    font-family:'Oswald',sans-serif;font-weight:600;font-size:13px;
+    letter-spacing:1.5px;text-transform:uppercase;
+    padding:16px 22px;cursor:pointer;
+    border-bottom:2px solid transparent;
+    transition:color .15s ease, border-color .15s ease;
+  }
+  .tab-btn:hover{color:var(--text);}
+  .tab-btn.active{color:var(--gold);border-bottom-color:var(--gold);}
+
+  /* ---------- layout ---------- */
+  .layout{
+    display:none;
+    grid-template-columns: 420px 1fr;
+    gap:1px;
+    background:var(--border);
+    flex:1 1 auto;
+    min-height:0;
+  }
+  .layout.active{display:grid;}
+  @media (max-width:980px){ .layout{grid-template-columns:1fr;} }
+
+  .col{background:var(--bg);padding:32px 40px;overflow-y:auto;}
+
+  .section-label{
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;
+    color:var(--gold);text-transform:uppercase;margin:0 0 18px 0;
+    display:flex;align-items:center;gap:10px;
+  }
+  .section-label::after{content:"";flex:1;height:1px;background:var(--border);}
+
+  /* ---------- form ---------- */
+  .field{margin-bottom:16px;}
+  .field label{
+    display:block;font-size:12px;color:var(--muted);margin-bottom:6px;
+    letter-spacing:0.3px;
+  }
+  .field input, .field select, .field textarea{
+    width:100%;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:11px 12px;
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    outline:none;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .field textarea{resize:vertical;min-height:76px;font-family:'Inter',sans-serif;}
+  .field input:focus, .field select:focus, .field textarea:focus{
+    border-color:var(--gold);
+    background:var(--panel-2);
+  }
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+  .btn{
+    width:100%;
+    padding:13px 16px;
+    border-radius:6px;
+    border:1px solid transparent;
+    font-family:'Oswald',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    cursor:pointer;
+    transition:transform .08s ease, filter .15s ease, opacity .15s ease;
+  }
+  .btn:active{transform:scale(0.98);}
+  .btn-primary{
+    background:linear-gradient(180deg, #C9A227, #A8841A);
+    color:#141414;
+    margin-top:6px;
+  }
+  .btn-primary:hover{filter:brightness(1.08);}
+  .btn-discord{
+    background:var(--panel);
+    border:1px solid var(--border);
+    color:var(--text);
+    margin-top:10px;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .btn-discord:hover{border-color:var(--gold);color:var(--gold);}
+  .btn-discord:disabled{opacity:0.4;cursor:not-allowed;}
+  .btn-ghost{
+    background:transparent;border:1px solid var(--border);color:var(--muted);
+    margin-top:8px;
+  }
+  .btn-ghost:hover{color:var(--text);border-color:var(--muted);}
+
+  /* ---------- preview column ---------- */
+  .preview-wrap{
+    display:flex;flex-direction:column;align-items:center;
+  }
+  canvas.doc-canvas{
+    max-width:100%;
+    width:100%;
+    height:auto;
+    border-radius:4px;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03);
+  }
+  .preview-actions{
+    display:flex;gap:10px;margin-top:20px;width:100%;max-width:640px;
+  }
+  .preview-actions .btn{margin-top:0;}
+
+  .empty-state{
+    border:1px dashed var(--border);
+    border-radius:10px;
+    padding:60px 30px;
+    text-align:center;
+    color:var(--muted);
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;
+    max-width:640px;
+    width:100%;
+  }
+
+  .log{margin-top:36px;width:100%;max-width:640px;}
+  .log-item{
+    display:flex;justify-content:space-between;gap:10px;
+    padding:10px 0;border-bottom:1px solid var(--border);
+    font-size:13px;
+  }
+  .log-item .who{color:var(--text);}
+  .log-item .meta{color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px;}
+  .log-empty{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+
+  .toast{
+    position:fixed;bottom:24px;right:24px;
+    background:var(--panel-2);border:1px solid var(--border);
+    padding:14px 18px;border-radius:8px;
+    font-size:13px;max-width:320px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.4);
+    opacity:0;transform:translateY(10px);
+    transition:opacity .2s ease, transform .2s ease;
+    pointer-events:none;
+    z-index:50;
+  }
+  .toast.show{opacity:1;transform:translateY(0);}
+  .toast.err{border-color:rgba(179,34,29,0.5);}
+  .toast.ok{border-color:rgba(60,190,110,0.4);}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="badge">RT</div>
+    <div class="brand-text">
+      <h1>ROTA</h1>
+      <span>SISTEMA DE ADVERTÊNCIAS · EXONERAÇÕES · PROMOÇÕES</span>
+    </div>
+  </div>
+  <div id="webhookStatus" class="status-pill off">WEBHOOK NÃO CONFIGURADO</div>
+</div>
+
+<div class="tabbar">
+  <button class="tab-btn active" data-tab="advertencia">Advertências / Exoneração</button>
+  <button class="tab-btn" data-tab="promocao">Promoções</button>
+</div>
+
+<!-- ==================== TAB: ADVERTÊNCIA / EXONERAÇÃO ==================== -->
+<div class="layout active" id="tab-advertencia">
+
+  <div class="col">
+    <p class="section-label">Dados do documento</p>
+
+    <form id="warnForm">
+      <div class="field">
+        <label for="docTipo">Tipo de documento</label>
+        <select id="docTipo">
+          <option value="ADVERTENCIA">Advertência</option>
+          <option value="EXONERACAO">Exoneração</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="infrator">Nome do jogador</label>
+        <input type="text" id="infrator" placeholder="Ex: João da Silva" required>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label for="passaporte">Passaporte / ID</label>
+          <input type="text" id="passaporte" placeholder="Ex: 00482" required>
+        </div>
+        <div class="field" id="tipoAdvertenciaField">
+          <label for="gravidade">Tipo de advertência</label>
+          <select id="gravidade">
+            <option value="VERBAL">Verbal</option>
+            <option value="1ª ADVERTÊNCIA" selected>1ª Advertência</option>
+            <option value="2ª ADVERTÊNCIA">2ª Advertência</option>
+            <option value="3ª ADVERTÊNCIA">3ª Advertência</option>
+          </select>
+        </div>
+        <div class="field" id="cargoExoneradoField" style="display:none;">
+          <label for="cargoExonerado">Cargo exonerado</label>
+          <input type="text" id="cargoExonerado" placeholder="Ex: 3º Sargento">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="motivo" id="motivoLabel">Motivo da advertência</label>
+        <textarea id="motivo" placeholder="Descreva a infração cometida..." required></textarea>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label for="policial">Policial responsável</label>
+          <input type="text" id="policial" placeholder="Ex: Sgt. Almeida" required>
+        </div>
+        <div class="field">
+          <label for="patente">Patente</label>
+          <input type="text" id="patente" placeholder="Ex: 3º Sgt." required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" id="warnSubmitBtn">Emitir advertência</button>
+      <button type="button" id="sendDiscordBtn" class="btn btn-discord" disabled>
+        Enviar documento ao Discord
+      </button>
+      <button type="button" id="downloadBtn" class="btn btn-ghost" disabled>
+        Baixar imagem (.png)
+      </button>
+    </form>
+  </div>
+
+  <div class="col">
+    <p class="section-label">Pré-visualização do documento</p>
+    <div class="preview-wrap">
+      <div id="emptyState" class="empty-state">
+        Preencha os dados ao lado e clique em<br><strong>"Emitir"</strong><br>
+        para gerar o documento oficial.
+      </div>
+      <canvas id="docCanvas" class="doc-canvas" width="1000" height="640" style="display:none;"></canvas>
+
+      <div class="log">
+        <p class="section-label" style="margin-top:36px;">Registro da sessão</p>
+        <div id="logList"><p class="log-empty">Nenhum documento emitido ainda nesta sessão.</p></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== TAB: PROMOÇÕES ==================== -->
+<div class="layout" id="tab-promocao">
+
+  <div class="col">
+    <p class="section-label">Dados da promoção</p>
+
+    <form id="promoForm">
+      <div class="field">
+        <label for="promoNome">Nome do policial</label>
+        <input type="text" id="promoNome" placeholder="Ex: João da Silva" required>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label for="promoPassaporte">Passaporte / ID</label>
+          <input type="text" id="promoPassaporte" placeholder="Ex: 00482" required>
+        </div>
+        <div class="field">
+          <label for="promoCargoAtual">Cargo atual</label>
+          <input type="text" id="promoCargoAtual" placeholder="Ex: Soldado" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="promoCargoNovo">Novo cargo</label>
+        <input type="text" id="promoCargoNovo" placeholder="Digite o novo cargo/patente" required>
+      </div>
+
+      <div class="field">
+        <label for="promoMotivo">Motivo / observação</label>
+        <textarea id="promoMotivo" placeholder="Ex: Bom desempenho em operações, tempo de serviço..."></textarea>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label for="promoResponsavel">Responsável pela promoção</label>
+          <input type="text" id="promoResponsavel" placeholder="Ex: Cel. Ferreira" required>
+        </div>
+        <div class="field">
+          <label for="promoPatenteResponsavel">Patente do responsável</label>
+          <input type="text" id="promoPatenteResponsavel" placeholder="Ex: Coronel" required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Emitir promoção</button>
+      <button type="button" id="sendDiscordBtnPromo" class="btn btn-discord" disabled>
+        Enviar documento ao Discord
+      </button>
+      <button type="button" id="downloadBtnPromo" class="btn btn-ghost" disabled>
+        Baixar imagem (.png)
+      </button>
+    </form>
+  </div>
+
+  <div class="col">
+    <p class="section-label">Pré-visualização do documento</p>
+    <div class="preview-wrap">
+      <div id="emptyStatePromo" class="empty-state">
+        Preencha os dados ao lado e clique em<br><strong>"Emitir promoção"</strong><br>
+        para gerar o certificado.
+      </div>
+      <canvas id="promoCanvas" class="doc-canvas" width="1000" height="640" style="display:none;"></canvas>
+
+      <div class="log">
+        <p class="section-label" style="margin-top:36px;">Registro da sessão</p>
+        <div id="logListPromo"><p class="log-empty">Nenhuma promoção emitida ainda nesta sessão.</p></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+/* ============================================================
+   Webhook fixo (só quem edita este arquivo consegue mudar)
+   ============================================================ */
+const WEBHOOK_URL = "https://discord.com/api/webhooks/1546745711448817717/qJIKRRF9ihJAjkonui_rlacNrpy_pdYk_odtbA7aFzeTf1NohMmbYeBHlVjdINSN-V9z";
+
+// Webhook do canal de PROMOÇÕES (pode ser um canal diferente do de advertências).
+// Cole aqui a URL do webhook criado nesse outro canal. Se deixar em branco,
+// as promoções são enviadas para o mesmo canal do WEBHOOK_URL acima.
+const PROMO_WEBHOOK_URL = "";
+
+const webhookStatus = document.getElementById('webhookStatus');
+function refreshWebhookStatus(){
+  if (WEBHOOK_URL) {
+    webhookStatus.textContent = 'WEBHOOK CONECTADO';
+    webhookStatus.className = 'status-pill on';
+  } else {
+    webhookStatus.textContent = 'WEBHOOK NÃO CONFIGURADO';
+    webhookStatus.className = 'status-pill off';
+  }
+}
+refreshWebhookStatus();
+
+function showToast(msg, type){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + (type || '');
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(()=> t.className = 'toast', 3200);
+}
+
+function pad(n){ return n.toString().padStart(2,'0'); }
+
+function docId(prefix){
+  const d = new Date();
+  return `${prefix}-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${Math.floor(Math.random()*90+10)}`;
+}
+
+function wrapText(context, text, x, y, maxWidth, lineHeight){
+  const words = text.split(' ');
+  let line = '';
+  let lines = [];
+  for(let n=0;n<words.length;n++){
+    const testLine = line + words[n] + ' ';
+    const metrics = context.measureText(testLine);
+    if (metrics.width > maxWidth && n > 0){
+      lines.push(line);
+      line = words[n] + ' ';
+    } else {
+      line = testLine;
+    }
+  }
+  lines.push(line);
+  lines.forEach((l,i)=> context.fillText(l.trim(), x, y + i*lineHeight));
+  return lines.length;
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ============================================================
+   Tabs
+   ============================================================ */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.layout').forEach(l=>l.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* ============================================================
+   ABA 1: ADVERTÊNCIA / EXONERAÇÃO
+   ============================================================ */
+const canvas = document.getElementById('docCanvas');
+const ctx = canvas.getContext('2d');
+const emptyState = document.getElementById('emptyState');
+const sendDiscordBtn = document.getElementById('sendDiscordBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const logList = document.getElementById('logList');
+const docTipo = document.getElementById('docTipo');
+const tipoAdvertenciaField = document.getElementById('tipoAdvertenciaField');
+const cargoExoneradoField = document.getElementById('cargoExoneradoField');
+const motivoLabel = document.getElementById('motivoLabel');
+const warnSubmitBtn = document.getElementById('warnSubmitBtn');
+
+let currentBlob = null;
+let currentData = null;
+let logEntries = [];
+
+docTipo.addEventListener('change', function(){
+  if(this.value === 'EXONERACAO'){
+    tipoAdvertenciaField.style.display = 'none';
+    cargoExoneradoField.style.display = 'block';
+    motivoLabel.textContent = 'Motivo da exoneração';
+    warnSubmitBtn.textContent = 'Emitir exoneração';
+    document.getElementById('gravidade').required = false;
+  } else {
+    tipoAdvertenciaField.style.display = 'block';
+    cargoExoneradoField.style.display = 'none';
+    motivoLabel.textContent = 'Motivo da advertência';
+    warnSubmitBtn.textContent = 'Emitir advertência';
+  }
+});
+
+function drawDocument(data){
+  const W = canvas.width, H = canvas.height;
+  const isExoneracao = data.tipoDoc === 'EXONERACAO';
+
+  ctx.fillStyle = '#EDE7D6';
+  ctx.fillRect(0,0,W,H);
+
+  ctx.save();
+  ctx.globalAlpha = 0.035;
+  for(let i=0;i<1800;i++){
+    ctx.fillStyle = Math.random() > 0.5 ? '#000' : '#fff';
+    ctx.fillRect(Math.random()*W, Math.random()*H, 1, 1);
+  }
+  ctx.restore();
+
+  ctx.strokeStyle = '#3A3226';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(24,24,W-48,H-48);
+  ctx.strokeStyle = '#3A3226';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(32,32,W-64,H-64);
+
+  ctx.fillStyle = '#14171B';
+  ctx.fillRect(32,32,W-64,110);
+
+  ctx.fillStyle = '#C9A227';
+  ctx.font = '700 15px Oswald, sans-serif';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText('R O T A', 60, 78);
+
+  ctx.fillStyle = '#EDE7D6';
+  ctx.font = '700 28px "Playfair Display", serif';
+  ctx.fillText('RONDAS OSTENSIVAS TOBIAS DE AGUIAR', 60, 106);
+
+  ctx.fillStyle = '#9AA0A6';
+  ctx.font = '400 13px "JetBrains Mono", monospace';
+  ctx.fillText(isExoneracao ? 'TERMO DE EXONERAÇÃO' : 'AUTO DE ADVERTÊNCIA DISCIPLINAR', 60, 128);
+
+  ctx.textAlign = 'right';
+  ctx.fillStyle = '#9AA0A6';
+  ctx.font = '400 12px "JetBrains Mono", monospace';
+  ctx.fillText('DOC. Nº ' + data.id, W-60, 78);
+  ctx.fillText(data.date, W-60, 96);
+  ctx.textAlign = 'left';
+
+  // selo (tipo de advertência OU "EXONERADO")
+  const gravColors = {
+    'VERBAL':'#3C7A3E',
+    '1ª ADVERTÊNCIA':'#B3821D',
+    '2ª ADVERTÊNCIA':'#C9601D',
+    '3ª ADVERTÊNCIA':'#B3221D',
+    'EXONERADO':'#B3221D'
+  };
+  const stampText = isExoneracao ? 'EXONERADO' : data.gravidade;
+  const stampColor = gravColors[stampText] || '#B3221D';
+  ctx.save();
+  ctx.font = 'italic 700 22px "Playfair Display", serif';
+  const stampTextWidth = ctx.measureText(stampText).width;
+  const stampW = stampTextWidth + 60;
+  ctx.translate(W-100-stampW/2, 210);
+  ctx.rotate(-0.22);
+  ctx.strokeStyle = stampColor;
+  ctx.lineWidth = 4;
+  ctx.strokeRect(-stampW/2,-26,stampW,52);
+  ctx.fillStyle = stampColor;
+  ctx.textAlign = 'center';
+  ctx.fillText(stampText, 0, 8);
+  ctx.restore();
+  ctx.textAlign = 'left';
+
+  let y = 210;
+  const labelX = 60;
+
+  function field(label, value, big){
+    ctx.fillStyle = '#7A7160';
+    ctx.font = '600 11px "JetBrains Mono", monospace';
+    ctx.fillText(label.toUpperCase(), labelX, y);
+    y += 22;
+    ctx.fillStyle = '#20211E';
+    ctx.font = (big ? '600 24px "Playfair Display", serif' : '500 17px Inter, sans-serif');
+    ctx.fillText(value, labelX, y);
+    y += 34;
+  }
+
+  field(isExoneracao ? 'Exonerado(a)' : 'Infrator', data.infrator, true);
+  field('Passaporte / ID', data.passaporte);
+  if(isExoneracao && data.cargoExonerado){
+    field('Cargo exonerado', data.cargoExonerado);
+  }
+
+  ctx.fillStyle = '#7A7160';
+  ctx.font = '600 11px "JetBrains Mono", monospace';
+  ctx.fillText(isExoneracao ? 'MOTIVO DA EXONERAÇÃO' : 'MOTIVO DA ADVERTÊNCIA', labelX, y);
+  y += 22;
+  ctx.fillStyle = '#20211E';
+  ctx.font = '400 16px Inter, sans-serif';
+  const linesUsed = wrapText(ctx, data.motivo, labelX, y, W-120, 24);
+  y += linesUsed*24 + 20;
+
+  ctx.strokeStyle = '#C9BFA3';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(labelX, y);
+  ctx.lineTo(W-60, y);
+  ctx.stroke();
+  y += 34;
+
+  field('Policial responsável', data.policial + '  ·  ' + data.patente);
+
+  const fy = H-120;
+
+  // assinatura em caneta, escrita à mão, acima da linha
+  ctx.save();
+  ctx.translate(70, fy-14);
+  ctx.rotate(-0.035);
+  ctx.fillStyle = '#1B2A4A';
+  ctx.font = '400 34px "Great Vibes", cursive';
+  ctx.textAlign = 'left';
+  ctx.fillText(data.policial, 0, 0);
+  ctx.restore();
+
+  ctx.strokeStyle = '#8A8370';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(60, fy);
+  ctx.lineTo(320, fy);
+  ctx.stroke();
+  ctx.fillStyle = '#7A7160';
+  ctx.font = '400 12px "JetBrains Mono", monospace';
+  ctx.fillText('Assinatura do agente responsável', 60, fy+20);
+
+  ctx.save();
+  ctx.translate(W-170, fy-20);
+  ctx.rotate(0.14);
+  ctx.strokeStyle = '#B3221D';
+  ctx.globalAlpha = 0.85;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(0,0,58,0,Math.PI*2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(0,0,48,0,Math.PI*2);
+  ctx.stroke();
+  ctx.fillStyle = '#B3221D';
+  ctx.font = '700 13px Oswald, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('ROTA', 0, -4);
+  ctx.font = '600 9px "JetBrains Mono", monospace';
+  ctx.fillText('DOCUMENTO OFICIAL', 0, 10);
+  ctx.restore();
+  ctx.textAlign = 'left';
+  ctx.globalAlpha = 1;
+
+  ctx.fillStyle = '#14171B';
+  ctx.fillRect(32, H-64, W-64, 16);
+  ctx.fillStyle = '#5A6169';
+  ctx.font = '400 10px "JetBrains Mono", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('Documento gerado automaticamente pelo Sistema ROTA — válido apenas para fins internos de roleplay', W/2, H-52);
+  ctx.textAlign = 'left';
+}
+
+document.getElementById('warnForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+
+  const tipoDoc = docTipo.value;
+  const data = {
+    tipoDoc,
+    id: docId('ROTA'),
+    date: new Date().toLocaleString('pt-BR'),
+    infrator: document.getElementById('infrator').value.trim(),
+    passaporte: document.getElementById('passaporte').value.trim(),
+    gravidade: document.getElementById('gravidade').value,
+    cargoExonerado: document.getElementById('cargoExonerado').value.trim(),
+    motivo: document.getElementById('motivo').value.trim(),
+    policial: document.getElementById('policial').value.trim(),
+    patente: document.getElementById('patente').value.trim(),
+  };
+
+  currentData = data;
+  emptyState.style.display = 'none';
+  canvas.style.display = 'block';
+  try{ await document.fonts.ready; }catch(e){}
+  drawDocument(data);
+
+  canvas.toBlob(function(blob){
+    currentBlob = blob;
+    downloadBtn.disabled = false;
+    sendDiscordBtn.disabled = false;
+  }, 'image/png');
+
+  logEntries.unshift(data);
+  renderLog();
+
+  showToast(tipoDoc === 'EXONERACAO' ? 'Exoneração emitida com sucesso.' : 'Advertência emitida com sucesso.', 'ok');
+});
+
+function renderLog(){
+  if(logEntries.length === 0){
+    logList.innerHTML = '<p class="log-empty">Nenhum documento emitido ainda nesta sessão.</p>';
+    return;
+  }
+  logList.innerHTML = logEntries.slice(0,8).map(d => `
+    <div class="log-item">
+      <span class="who">${escapeHtml(d.infrator)} <span style="color:var(--muted);">— ${escapeHtml(d.tipoDoc === 'EXONERACAO' ? 'Exoneração' : d.gravidade)}</span></span>
+      <span class="meta">${escapeHtml(d.date)}</span>
+    </div>
+  `).join('');
+}
+
+downloadBtn.addEventListener('click', function(){
+  if(!currentBlob) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(currentBlob);
+  const prefix = currentData.tipoDoc === 'EXONERACAO' ? 'exoneracao' : 'advertencia';
+  a.download = `${prefix}_${currentData.infrator.replace(/\s+/g,'_')}.png`;
+  a.click();
+});
+
+sendDiscordBtn.addEventListener('click', async function(){
+  if(!WEBHOOK_URL){ showToast('Webhook não configurado no código do site.', 'err'); return; }
+  if(!currentBlob){ showToast('Emita um documento antes de enviar.', 'err'); return; }
+
+  sendDiscordBtn.disabled = true;
+  sendDiscordBtn.textContent = 'Enviando...';
+
+  try{
+    const isExoneracao = currentData.tipoDoc === 'EXONERACAO';
+    const prefix = isExoneracao ? 'exoneracao' : 'advertencia';
+    const filename = `${prefix}_${currentData.infrator.replace(/\s+/g,'_')}.png`;
+    const form = new FormData();
+    form.append('file', currentBlob, filename);
+
+    const gravColor = isExoneracao ? 11738141 : ({
+      'VERBAL':3979838, '1ª ADVERTÊNCIA':11753501, '2ª ADVERTÊNCIA':13188893, '3ª ADVERTÊNCIA':11738141
+    }[currentData.gravidade] || 11738141);
+
+    const fields = [
+      { name: isExoneracao ? 'Exonerado(a)' : 'Infrator', value: currentData.infrator, inline: true },
+      { name: 'Passaporte', value: currentData.passaporte, inline: true },
+    ];
+    if(isExoneracao){
+      fields.push({ name: 'Cargo exonerado', value: currentData.cargoExonerado || '—', inline: true });
+    } else {
+      fields.push({ name: 'Tipo', value: currentData.gravidade, inline: true });
+    }
+    fields.push({ name: 'Policial responsável', value: `${currentData.policial} (${currentData.patente})`, inline: false });
+    fields.push({ name: 'Motivo', value: currentData.motivo, inline: false });
+
+    const payload = {
+      username: 'ROTA · Sistema de Advertências',
+      embeds: [{
+        title: isExoneracao ? 'Nova exoneração emitida' : 'Nova advertência emitida',
+        color: gravColor,
+        fields,
+        image: { url: `attachment://${filename}` },
+        footer: { text: `Doc. ${currentData.id}` },
+        timestamp: new Date().toISOString()
+      }]
+    };
+    form.append('payload_json', JSON.stringify(payload));
+
+    const res = await fetch(WEBHOOK_URL, { method: 'POST', body: form });
+    if(!res.ok){
+      const errText = await res.text();
+      throw new Error(`Discord respondeu ${res.status}: ${errText}`);
+    }
+    showToast('Documento enviado ao Discord.', 'ok');
+  }catch(err){
+    console.error(err);
+    showToast('Falha ao enviar: ' + err.message, 'err');
+  }finally{
+    sendDiscordBtn.disabled = false;
+    sendDiscordBtn.textContent = 'Enviar documento ao Discord';
+  }
+});
+
+/* ============================================================
+   ABA 2: PROMOÇÕES
+   ============================================================ */
+const promoCanvas = document.getElementById('promoCanvas');
+const pctx = promoCanvas.getContext('2d');
+const emptyStatePromo = document.getElementById('emptyStatePromo');
+const sendDiscordBtnPromo = document.getElementById('sendDiscordBtnPromo');
+const downloadBtnPromo = document.getElementById('downloadBtnPromo');
+const logListPromo = document.getElementById('logListPromo');
+
+let currentBlobPromo = null;
+let currentDataPromo = null;
+let logEntriesPromo = [];
+
+function drawPromoDocument(data){
+  const W = promoCanvas.width, H = promoCanvas.height;
+
+  pctx.fillStyle = '#EDE7D6';
+  pctx.fillRect(0,0,W,H);
+
+  pctx.save();
+  pctx.globalAlpha = 0.035;
+  for(let i=0;i<1800;i++){
+    pctx.fillStyle = Math.random() > 0.5 ? '#000' : '#fff';
+    pctx.fillRect(Math.random()*W, Math.random()*H, 1, 1);
+  }
+  pctx.restore();
+
+  pctx.strokeStyle = '#3A3226';
+  pctx.lineWidth = 3;
+  pctx.strokeRect(24,24,W-48,H-48);
+  pctx.strokeStyle = '#C9A227';
+  pctx.lineWidth = 1;
+  pctx.strokeRect(32,32,W-64,H-64);
+
+  pctx.fillStyle = '#14171B';
+  pctx.fillRect(32,32,W-64,110);
+
+  pctx.fillStyle = '#C9A227';
+  pctx.font = '700 15px Oswald, sans-serif';
+  pctx.textBaseline = 'alphabetic';
+  pctx.fillText('R O T A', 60, 78);
+
+  pctx.fillStyle = '#EDE7D6';
+  pctx.font = '700 28px "Playfair Display", serif';
+  pctx.fillText('RONDAS OSTENSIVAS TOBIAS DE AGUIAR', 60, 106);
+
+  pctx.fillStyle = '#9AA0A6';
+  pctx.font = '400 13px "JetBrains Mono", monospace';
+  pctx.fillText('CERTIFICADO DE PROMOÇÃO', 60, 128);
+
+  pctx.textAlign = 'right';
+  pctx.fillStyle = '#9AA0A6';
+  pctx.font = '400 12px "JetBrains Mono", monospace';
+  pctx.fillText('DOC. Nº ' + data.id, W-60, 78);
+  pctx.fillText(data.date, W-60, 96);
+  pctx.textAlign = 'left';
+
+  // selo dourado "PROMOVIDO"
+  pctx.save();
+  pctx.font = 'italic 700 22px "Playfair Display", serif';
+  const stampTextWidth = pctx.measureText('PROMOVIDO').width;
+  const stampW = stampTextWidth + 60;
+  pctx.translate(W-100-stampW/2, 210);
+  pctx.rotate(-0.22);
+  pctx.strokeStyle = '#3C7A3E';
+  pctx.lineWidth = 4;
+  pctx.strokeRect(-stampW/2,-26,stampW,52);
+  pctx.fillStyle = '#3C7A3E';
+  pctx.textAlign = 'center';
+  pctx.fillText('PROMOVIDO', 0, 8);
+  pctx.restore();
+  pctx.textAlign = 'left';
+
+  let y = 210;
+  const labelX = 60;
+
+  function field(label, value, big){
+    pctx.fillStyle = '#7A7160';
+    pctx.font = '600 11px "JetBrains Mono", monospace';
+    pctx.fillText(label.toUpperCase(), labelX, y);
+    y += 22;
+    pctx.fillStyle = '#20211E';
+    pctx.font = (big ? '600 24px "Playfair Display", serif' : '500 17px Inter, sans-serif');
+    pctx.fillText(value, labelX, y);
+    y += 34;
+  }
+
+  field('Policial promovido(a)', data.nome, true);
+  field('Passaporte / ID', data.passaporte);
+
+  // cargo atual -> novo cargo
+  pctx.fillStyle = '#7A7160';
+  pctx.font = '600 11px "JetBrains Mono", monospace';
+  pctx.fillText('MUDANÇA DE CARGO', labelX, y);
+  y += 26;
+  pctx.fillStyle = '#20211E';
+  pctx.font = '600 21px "Playfair Display", serif';
+  const fromText = data.cargoAtual;
+  pctx.fillText(fromText, labelX, y);
+  const fromWidth = pctx.measureText(fromText).width;
+  pctx.fillStyle = '#3C7A3E';
+  pctx.font = '700 21px "Playfair Display", serif';
+  pctx.fillText('  →  ' + data.cargoNovo, labelX + fromWidth, y);
+  y += 40;
+
+  if(data.motivo){
+    pctx.fillStyle = '#7A7160';
+    pctx.font = '600 11px "JetBrains Mono", monospace';
+    pctx.fillText('OBSERVAÇÃO', labelX, y);
+    y += 22;
+    pctx.fillStyle = '#20211E';
+    pctx.font = '400 16px Inter, sans-serif';
+    const linesUsed = wrapText(pctx, data.motivo, labelX, y, W-120, 24);
+    y += linesUsed*24 + 20;
+  } else {
+    y += 10;
+  }
+
+  pctx.strokeStyle = '#C9BFA3';
+  pctx.lineWidth = 1;
+  pctx.beginPath();
+  pctx.moveTo(labelX, y);
+  pctx.lineTo(W-60, y);
+  pctx.stroke();
+  y += 34;
+
+  field('Responsável pela promoção', data.responsavel + '  ·  ' + data.patenteResponsavel);
+
+  const fy = H-120;
+
+  // assinatura em caneta, escrita à mão, acima da linha
+  pctx.save();
+  pctx.translate(70, fy-14);
+  pctx.rotate(-0.035);
+  pctx.fillStyle = '#1B2A4A';
+  pctx.font = '400 34px "Great Vibes", cursive';
+  pctx.textAlign = 'left';
+  pctx.fillText(data.responsavel, 0, 0);
+  pctx.restore();
+
+  pctx.strokeStyle = '#8A8370';
+  pctx.lineWidth = 1;
+  pctx.beginPath();
+  pctx.moveTo(60, fy);
+  pctx.lineTo(320, fy);
+  pctx.stroke();
+  pctx.fillStyle = '#7A7160';
+  pctx.font = '400 12px "JetBrains Mono", monospace';
+  pctx.fillText('Assinatura do agente responsável', 60, fy+20);
+
+  pctx.save();
+  pctx.translate(W-170, fy-20);
+  pctx.rotate(0.14);
+  pctx.strokeStyle = '#C9A227';
+  pctx.globalAlpha = 0.9;
+  pctx.lineWidth = 3;
+  pctx.beginPath();
+  pctx.arc(0,0,58,0,Math.PI*2);
+  pctx.stroke();
+  pctx.beginPath();
+  pctx.arc(0,0,48,0,Math.PI*2);
+  pctx.stroke();
+  pctx.fillStyle = '#C9A227';
+  pctx.font = '700 13px Oswald, sans-serif';
+  pctx.textAlign = 'center';
+  pctx.fillText('ROTA', 0, -4);
+  pctx.font = '600 9px "JetBrains Mono", monospace';
+  pctx.fillText('DOCUMENTO OFICIAL', 0, 10);
+  pctx.restore();
+  pctx.textAlign = 'left';
+  pctx.globalAlpha = 1;
+
+  pctx.fillStyle = '#14171B';
+  pctx.fillRect(32, H-64, W-64, 16);
+  pctx.fillStyle = '#5A6169';
+  pctx.font = '400 10px "JetBrains Mono", monospace';
+  pctx.textAlign = 'center';
+  pctx.fillText('Documento gerado automaticamente pelo Sistema ROTA — válido apenas para fins internos de roleplay', W/2, H-52);
+  pctx.textAlign = 'left';
+}
+
+document.getElementById('promoForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+
+  const data = {
+    id: docId('PROMO'),
+    date: new Date().toLocaleString('pt-BR'),
+    nome: document.getElementById('promoNome').value.trim(),
+    passaporte: document.getElementById('promoPassaporte').value.trim(),
+    cargoAtual: document.getElementById('promoCargoAtual').value.trim(),
+    cargoNovo: document.getElementById('promoCargoNovo').value.trim(),
+    motivo: document.getElementById('promoMotivo').value.trim(),
+    responsavel: document.getElementById('promoResponsavel').value.trim(),
+    patenteResponsavel: document.getElementById('promoPatenteResponsavel').value.trim(),
+  };
+
+  currentDataPromo = data;
+  emptyStatePromo.style.display = 'none';
+  promoCanvas.style.display = 'block';
+  try{ await document.fonts.ready; }catch(e){}
+  drawPromoDocument(data);
+
+  promoCanvas.toBlob(function(blob){
+    currentBlobPromo = blob;
+    downloadBtnPromo.disabled = false;
+    sendDiscordBtnPromo.disabled = false;
+  }, 'image/png');
+
+  logEntriesPromo.unshift(data);
+  renderLogPromo();
+
+  showToast('Promoção emitida com sucesso.', 'ok');
+});
+
+function renderLogPromo(){
+  if(logEntriesPromo.length === 0){
+    logListPromo.innerHTML = '<p class="log-empty">Nenhuma promoção emitida ainda nesta sessão.</p>';
+    return;
+  }
+  logListPromo.innerHTML = logEntriesPromo.slice(0,8).map(d => `
+    <div class="log-item">
+      <span class="who">${escapeHtml(d.nome)} <span style="color:var(--muted);">— ${escapeHtml(d.cargoNovo)}</span></span>
+      <span class="meta">${escapeHtml(d.date)}</span>
+    </div>
+  `).join('');
+}
+
+downloadBtnPromo.addEventListener('click', function(){
+  if(!currentBlobPromo) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(currentBlobPromo);
+  a.download = `promocao_${currentDataPromo.nome.replace(/\s+/g,'_')}.png`;
+  a.click();
+});
+
+sendDiscordBtnPromo.addEventListener('click', async function(){
+  const targetWebhook = PROMO_WEBHOOK_URL || WEBHOOK_URL;
+  if(!targetWebhook){ showToast('Webhook não configurado no código do site.', 'err'); return; }
+  if(!currentBlobPromo){ showToast('Emita uma promoção antes de enviar.', 'err'); return; }
+
+  sendDiscordBtnPromo.disabled = true;
+  sendDiscordBtnPromo.textContent = 'Enviando...';
+
+  try{
+    const filename = `promocao_${currentDataPromo.nome.replace(/\s+/g,'_')}.png`;
+    const form = new FormData();
+    form.append('file', currentBlobPromo, filename);
+
+    const payload = {
+      username: 'ROTA · Sistema de Advertências',
+      embeds: [{
+        title: 'Nova promoção emitida',
+        color: 3979838,
+        fields: [
+          { name: 'Policial', value: currentDataPromo.nome, inline: true },
+          { name: 'Passaporte', value: currentDataPromo.passaporte, inline: true },
+          { name: 'Novo cargo', value: currentDataPromo.cargoNovo, inline: true },
+          { name: 'Cargo anterior', value: currentDataPromo.cargoAtual, inline: false },
+          { name: 'Responsável', value: `${currentDataPromo.responsavel} (${currentDataPromo.patenteResponsavel})`, inline: false },
+          ...(currentDataPromo.motivo ? [{ name: 'Observação', value: currentDataPromo.motivo, inline: false }] : []),
+        ],
+        image: { url: `attachment://${filename}` },
+        footer: { text: `Doc. ${currentDataPromo.id}` },
+        timestamp: new Date().toISOString()
+      }]
+    };
+    form.append('payload_json', JSON.stringify(payload));
+
+    const res = await fetch(targetWebhook, { method: 'POST', body: form });
+    if(!res.ok){
+      const errText = await res.text();
+      throw new Error(`Discord respondeu ${res.status}: ${errText}`);
+    }
+    showToast('Documento enviado ao Discord.', 'ok');
+  }catch(err){
+    console.error(err);
+    showToast('Falha ao enviar: ' + err.message, 'err');
+  }finally{
+    sendDiscordBtnPromo.disabled = false;
+    sendDiscordBtnPromo.textContent = 'Enviar documento ao Discord';
+  }
+});
+</script>
+
+</body>
+</html>
